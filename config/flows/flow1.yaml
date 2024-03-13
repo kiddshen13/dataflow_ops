@@ -1,0 +1,85 @@
+# API调用步骤
+api_calls:
+  - step_name: "API调用1"
+    api_name: "service_1"
+    api_endpoint: "http://api.endpoint/service_1"
+    api_keys: [ "API_KEY_1A", "API_KEY_2A" ]
+    input_fields: [ "field1", "field2" ]
+    output_config:
+      action: "save"
+      target_database: "elasticsearch"
+      target_index: "your_index_1"
+      target_doc_type: "your_type_1"
+    error_handling:
+      retry:
+        max_retries: 3
+        delay: 5 # 重试间隔时间(秒)
+      fallback:
+        api_endpoint: "http://backup.endpoint/service_1" # 备用API地址
+    response_handling:
+      format: "json" # 响应格式,可选值: "json", "code", ...
+      processing:
+        - method: "clean_html" # 对响应进行处理的方法
+          args: [ ... ]
+    headers:
+      Authorization: "Bearer <token>"
+      Content-Type: "application/json"
+
+  - step_name: "API调用2"
+    api_name: "service_2"
+    api_endpoint: "http://api.endpoint/service_2"
+    api_keys: ["API_KEY_2A", "API_KEY_2B"]
+    input_fields: ["field3", "field4"]
+    output_config:
+      action: "save"
+      target_database: "mongodb"
+      target_collection: "your_collection"
+    on_error:
+      retry: 2
+      next_step: "error_handling"
+
+# 数据库操作步骤
+database_operations:
+  - step: "保存到ElasticSearch"
+    database_type: "elasticsearch"
+    index: "your_index_1"
+    document_type: "your_type_1"
+    operation: "save"
+    data:
+      field1: "value1"
+      field2: "value2"
+
+# 外部方法调用步骤
+external_calls:
+  - step: "Java方法调用"
+    method_name: "com.example.YourJavaClass.yourMethod"
+    parameters:
+      - "param1"
+      - "param2"
+    on_success: "next_step"
+    on_error: "error_handling"
+
+# 任务定义
+tasks:
+  - name: task_1
+    dependencies: []
+    steps:
+      - "API调用1"
+      - "保存到ElasticSearch"
+  - name: task_2
+    dependencies: [task_1]
+    steps:
+      - "API调用2"
+  - name: task_3
+    dependencies: []
+    steps:
+      - "Java方法调用"
+  - name: task_4
+    dependencies: [task_2, task_3]
+    steps:
+      - "任务报告"
+
+# 并行组定义
+parallel_groups:
+  - [task_1, task_3]
+  - [task_4]

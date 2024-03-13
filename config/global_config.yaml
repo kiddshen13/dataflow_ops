@@ -1,0 +1,27 @@
+# 全局配置
+databases:
+  elasticsearch:
+    host: "es-host"
+    port: 9200
+  mongodb:
+    uri: "mongodb-uri"
+  mysql:
+    host: "mysql-host"
+    user: "user"
+    password: "password"
+    database: "database_name"
+
+mq:
+  host: "mq-server-host"
+  port: 5672
+  user: "mq-user"
+  password: "mq-password"
+  queues:
+    - name: "data_queue_1"
+      type: "data_type_1"
+    - name: "data_queue_2"
+      type: "data_type_2"
+
+data_types:
+  data_type_1: "flow_1"
+  data_type_2: "flow_2"
